@@ -72,7 +72,7 @@
 
     function callApi(ano) {
         if(ano){
-            let URL = "http://ergast.com/api/f1/"+ ano +".json";
+            let URL = "https://ergast.com/api/f1/"+ ano +".json";
 
             fetch(URL)
                 .then(req => req.json())
