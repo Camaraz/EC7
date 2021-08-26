@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+
+        <title>ATIVIDADE LP3</title>
+        <style>
+            body {font-family: Verdana, sans-serif;}
+        </style>
+    </head>
+    
+    <body>
+    <!--
+        - Criar uma página WEB
+        - Carregar dados de uma WEB API REST/JSON disponível na Internet (púplica)
+        - Criar TAGs na página WEB para exibir os dados da API
+        - Publicar página na Internet no GitHub Pages
+        - Projeto Individual (próxima semana)
+        - Vai compor a nota para N1 1B
+        - Gerar gráfico com ChartJS - https://www.chartjs.org/
+        - Consumir DuckDuckGo
+        - Consumir GitHub Jobs
+    -->    
+        <div class="container">
+            <h1>Campeonatos de Fórmula 1:</h1>
+            <br>
+            <label for="ano">Selecione o ano:</label>
+            <select name="select" onchange="callApi(value);" class="form-control" style="width: 20%;">
+                <option value="" selected>Selecione</option>
+                <option value="2015">2015</option>
+                <option value="2016">2016</option>
+                <option value="2017">2017</option>
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+            </select>
+        </div>
+        <br>
+        <div class="container">
+
+            <div class="row">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                        <tr style="text-align: center;">
+                            <th>Grand Prix</th>
+                            <th>Local</th>
+                            <th>Link do Circuito</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableData"></tbody>
+                </table>
+            </div>
+
+            <div class="row">
+                <canvas id="myChart" width="600" height="400"></canvas>
+            </div>
+            
+        </div>
+
+    </body>
+</html>
+
+<script>
+    var listaDatas;
+    var myChart;
+
+    function callApi(ano) {
+        if(ano){
+            let URL = "https://ergast.com/api/f1/"+ ano +".json";
+
+            fetch(URL)
+                .then(req => req.json())
+                .then(show => { console.log(show); fillTable(show) })
+        }
+    }
+
+    function fillTable(tableData) {
+        listaDatas = [];
+        const tbodyTag = document.getElementById("tableData");
+        tbodyTag.innerHTML="";
+
+        for(var race in tableData.MRData.RaceTable.Races) {
+
+            let trTag = document.createElement("tr");
+            let tdGrandPrix = document.createElement("td");
+            let tdLocal = document.createElement("td");
+            let tdLinkCircuito = document.createElement("td");
+            let tdData = document.createElement("td");
+
+            tdGrandPrix.innerHTML = tableData.MRData.RaceTable.Races[race].Circuit.circuitName;
+            trTag.appendChild(tdGrandPrix);
+
+            tdLocal.innerHTML = tableData.MRData.RaceTable.Races[race].Circuit.Location.country;
+            trTag.appendChild(tdLocal);
+
+            tdLinkCircuito.innerHTML = '<a href="'+ tableData.MRData.RaceTable.Races[race].url +'" target="_blank">' + tableData.MRData.RaceTable.Races[race].url  + '</a>';
+            trTag.appendChild(tdLinkCircuito);
+
+            tdData.innerHTML = tableData.MRData.RaceTable.Races[race].date;
+            trTag.appendChild(tdData);
+
+            tbodyTag.appendChild(trTag);
+
+            listaDatas.push(tableData.MRData.RaceTable.Races[race].date);
+        }
+        montaGrafico(listaDatas);
+    }
+
+   function montaGrafico(datas){
+       //vetor de 12 posições - 1 para cada mês
+        var valores = [0,0,0,0,0,0,0,0,0,0,0,0];
+        
+        for(var x in datas){
+            var mes = datas[x].split("-");
+            if(mes[1] == "01")
+                valores[0]++;
+
+            if(mes[1] == "02")
+                valores[1]++;
+
+            if(mes[1] == "03")
+                valores[2]++;
+            
+            if(mes[1] == "04")
+                valores[3]++;
+
+            if(mes[1] == "05")
+                valores[4]++;
+
+            if(mes[1] == "06")
+                valores[5]++;
+
+            if(mes[1] == "07")
+                valores[6]++;
+
+            if(mes[1] == "08")
+                valores[7]++;
+
+            if(mes[1] == "09")
+                valores[8]++;
+            
+            if(mes[1] == "10")
+                valores[9]++;
+
+            if(mes[1] == "11")
+                valores[10]++;
+
+            if(mes[1] == "12")
+                valores[11]++;
+        }
+        
+        var ctx = document.getElementById('myChart').getContext('2d');
+        
+        if(myChart)
+            myChart.destroy();
+
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro' ],
+                datasets: [{
+                    label: 'Corridas no Mês',
+                    data: valores,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 0.5)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+
+</script>
